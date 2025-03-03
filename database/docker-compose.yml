@@ -55,5 +55,4 @@ volumes:
   mongo_notification_data:
   mongo_event_data:
 
-
   
