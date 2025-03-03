@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # PostgreSQL for User Service
   postgres_user:
@@ -49,10 +47,20 @@ services:
     volumes:
       - mongo_event_data:/data/db
 
+  # RabbitMQ Message Broker
+  rabbitmq:
+    image: rabbitmq:3-management # Includes management UI
+    container_name: rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    ports:
+      - "5672:5672" # Default RabbitMQ messaging port
+      - "15672:15672" # Management UI port
+
 volumes:
   pg_user_data:
   pg_booking_data:
   mongo_notification_data:
   mongo_event_data:
-
-  
