@@ -39,7 +39,16 @@ export function UserList() {
                 setLoading(true);
                 // This is a simplified example - you might need to implement an admin API to get all users
                 const data = await userService.getAllUsers(); // You'll need to add this method to userService
-                setUsers(data);
+                const formattedData = data.map((user: any) => ({
+                    id: user.id,
+                    name: user.username,
+                    email: user.email,
+                    role: user.role || "user", // default role if not provided
+                    status: user.status || "inactive", // default status if not provided
+                    createdAt: user.createdAt || new Date().toISOString(), // default createdAt if not provided
+                    avatar: user.avatar || "", // default avatar if not provided
+                }));
+                setUsers(formattedData);
                 setLoading(false);
             } catch (error) {
                 console.error('Failed to fetch users:', error);

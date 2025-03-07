@@ -1,14 +1,10 @@
 import { userApi } from './api-client';
 
-export type User = {
-    id: string;
-    name: string;
+export interface User {
+    id?: string;
+    username: string;
     email: string;
-    role: string;
-    status: "active" | "inactive";
-    createdAt: string;
-    avatar?: string;
-};
+}
 
 export interface UserCreate {
     username: string;
@@ -20,28 +16,6 @@ export interface UserLogin {
     email: string;
     password: string;
 }
-
-const mockUsers: User[] = [
-    {
-        id: "1",
-        name: "John Doe",
-        email: "john.doe@example.com",
-        role: "Admin",
-        status: "active",
-        createdAt: "2023-01-01T00:00:00Z",
-        avatar: "https://via.placeholder.com/150",
-    },
-    {
-        id: "2",
-        name: "Jane Smith",
-        email: "jane.smith@example.com",
-        role: "User",
-        status: "inactive",
-        createdAt: "2023-02-01T00:00:00Z",
-        avatar: "https://via.placeholder.com/150",
-    },
-    // Add more mock users as needed
-];
 
 export const userService = {
     register: async (userData: UserCreate) => {
@@ -60,16 +34,16 @@ export const userService = {
         return response.data;
     },
 
-    getAllUsers: async (): Promise<User[]> => {
-        // Simulate an API call with a delay
-        return new Promise((resolve) => {
-            setTimeout(() => {
-                resolve(mockUsers);
-            }, 1000);
-        });
-    },
-
     logout: () => {
         localStorage.removeItem('token');
+    },
+
+    // This would require an admin endpoint in the backend
+    getAllUsers: async () => {
+        // For now, we'll return a mock response since the backend doesn't have this endpoint
+        return [
+            { id: '1', username: 'admin', email: 'admin@example.com' },
+            { id: '2', username: 'user1', email: 'user1@example.com' }
+        ];
     }
 };

@@ -2,10 +2,10 @@ import axios from 'axios';
 
 // Base URLs for each service
 const API_URLS = {
-    user: 'http://localhost:8000',
-    event: 'http://localhost:8001',
-    booking: 'http://localhost:8002',
-    notification: 'http://localhost:8003'
+    user: process.env.NEXT_PUBLIC_USER_SERVICE_URL || 'http://localhost:8000',
+    event: process.env.NEXT_PUBLIC_EVENT_SERVICE_URL || 'http://localhost:8001',
+    booking: process.env.NEXT_PUBLIC_BOOKING_SERVICE_URL || 'http://localhost:8002',
+    notification: process.env.NEXT_PUBLIC_NOTIFICATION_SERVICE_URL || 'http://localhost:8003'
 };
 
 // Create axios instances for each service
@@ -37,14 +37,18 @@ export const notificationApi = axios.create({
     }
 });
 
-// Add auth token interceptor for protected routes
-userApi.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+// Add a request interceptor to include the token in the headers
+[userApi, eventApi, bookingApi, notificationApi].forEach(api => {
+    api.interceptors.request.use(
+        (config) => {
+            const token = localStorage.getItem('token');
+            if (token) {
+                config.headers.Authorization = `Bearer ${token}`;
+            }
+            return config;
+        },
+        (error) => {
+            return Promise.reject(error);
         }
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+    );
+});

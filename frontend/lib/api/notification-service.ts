@@ -1,11 +1,11 @@
 import { notificationApi } from './api-client';
 
 export interface Notification {
-    id: string;
+    id?: string;
     recipient: string;
     subject: string;
     message: string;
-    timestamp: string;
+    timestamp?: string;
 }
 
 export const notificationService = {

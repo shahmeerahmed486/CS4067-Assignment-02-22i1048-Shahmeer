@@ -15,6 +15,7 @@ import {
 import { Calendar, Edit, MoreHorizontal, Trash, Users } from "lucide-react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
+import { eventService } from "@/lib/api/event-service"
 
 type Event = {
     id: string
@@ -32,78 +33,22 @@ export function EventList() {
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState("")
 
+    // Inside the useEffect hook
     useEffect(() => {
-        // Simulate fetching events
         const fetchEvents = async () => {
             try {
-                setLoading(true)
-                // In a real app, this would be an API call
-                // const data = await fetch('/api/events').then(res => res.json())
-
-                // Simulated data
-                setTimeout(() => {
-                    setEvents([
-                        {
-                            id: "1",
-                            title: "Tech Conference 2023",
-                            description: "Annual technology conference",
-                            date: "2023-08-15T09:00:00Z",
-                            location: "Convention Center, New York",
-                            capacity: 500,
-                            attendees: 320,
-                            status: "upcoming",
-                        },
-                        {
-                            id: "2",
-                            title: "Product Launch",
-                            description: "Launch of our new product line",
-                            date: "2023-07-20T14:00:00Z",
-                            location: "Main Office, San Francisco",
-                            capacity: 150,
-                            attendees: 120,
-                            status: "upcoming",
-                        },
-                        {
-                            id: "3",
-                            title: "Developer Workshop",
-                            description: "Hands-on workshop for developers",
-                            date: "2023-06-10T10:00:00Z",
-                            location: "Tech Hub, Austin",
-                            capacity: 50,
-                            attendees: 50,
-                            status: "completed",
-                        },
-                        {
-                            id: "4",
-                            title: "Annual Meetup",
-                            description: "Networking event for professionals",
-                            date: "2023-09-05T18:00:00Z",
-                            location: "Grand Hotel, Chicago",
-                            capacity: 200,
-                            attendees: 0,
-                            status: "upcoming",
-                        },
-                        {
-                            id: "5",
-                            title: "Webinar: Future of AI",
-                            description: "Online discussion about AI trends",
-                            date: "2023-07-12T15:00:00Z",
-                            location: "Virtual",
-                            capacity: 1000,
-                            attendees: 750,
-                            status: "upcoming",
-                        },
-                    ])
-                    setLoading(false)
-                }, 1000)
+                setLoading(true);
+                const data = await eventService.getAllEvents();
+                setEvents(data);
+                setLoading(false);
             } catch (error) {
-                console.error("Failed to fetch events:", error)
-                setLoading(false)
+                console.error('Failed to fetch events:', error);
+                setLoading(false);
             }
-        }
+        };
 
-        fetchEvents()
-    }, [])
+        fetchEvents();
+    }, []);
 
     const filteredEvents = events.filter(
         (event) =>

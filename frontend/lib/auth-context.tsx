@@ -2,10 +2,12 @@
 
 import { createContext, useContext, useState, useEffect } from 'react'
 import { userService, User } from '@/lib/api/user-service'
+import { jwtDecode } from 'jwt-decode'
 
 type AuthContextType = {
     user: User | null;
     login: (email: string, password: string) => Promise<void>;
+    register: (username: string, email: string, password: string) => Promise<void>;
     logout: () => void;
     loading: boolean;
 }
@@ -23,12 +25,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 const token = localStorage.getItem('token')
 
                 if (token) {
-                    // Get user profile from token
-                    // This is a simplified example - you might need to decode the JWT to get the email
-                    // or make a separate API call to get the user profile
-                    const email = "user@example.com"; // Replace with actual email extraction from token
-                    const userData = await userService.getProfile(email);
-                    setUser(userData);
+                    // Decode JWT to get user email
+                    try {
+                        const decoded = jwtDecode(token) as { sub: string };
+                        if (decoded.sub) {
+                            const userData = await userService.getProfile(decoded.sub);
+                            setUser(userData);
+                        }
+                    } catch (error) {
+                        console.error('Failed to decode token:', error);
+                        localStorage.removeItem('token');
+                    }
                 }
             } catch (error) {
                 console.error('Authentication error:', error)
@@ -55,13 +62,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }
 
+    const register = async (username: string, email: string, password: string) => {
+        try {
+            setLoading(true)
+            await userService.register({ username, email, password });
+            // Automatically log in after registration
+            await login(email, password);
+        } catch (error) {
+            console.error('Registration error:', error)
+            throw error
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const logout = () => {
         userService.logout();
         setUser(null)
     }
 
     return (
-        <AuthContext.Provider value={{ user, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, login, register, logout, loading }}>
             {children}
         </AuthContext.Provider>
     )
