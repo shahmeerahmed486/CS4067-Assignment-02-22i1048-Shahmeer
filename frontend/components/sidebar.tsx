@@ -5,11 +5,12 @@ import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Users, Calendar, BookOpen, Bell, Home, Settings, BarChart } from "lucide-react"
+import { useAuth } from "@/lib/auth-context"
 
 const routes = [
     {
         name: "Dashboard",
-        path: "/",
+        path: "/dashboard",
         icon: <Home className="h-5 w-5" />,
     },
     {
@@ -33,6 +34,11 @@ const routes = [
         icon: <Bell className="h-5 w-5" />,
     },
     {
+        name: "Notifications",
+        path: "/notifications",
+        icon: <Bell className="h-5 w-5" />,
+    },
+    {
         name: "Analytics",
         path: "/analytics",
         icon: <BarChart className="h-5 w-5" />,
@@ -46,6 +52,11 @@ const routes = [
 
 export function Sidebar() {
     const pathname = usePathname()
+    const { isAuthenticated } = useAuth()
+
+    if (!isAuthenticated) {
+        return null
+    }
 
     return (
         <aside className="hidden w-64 flex-col border-r bg-muted/40 md:flex">

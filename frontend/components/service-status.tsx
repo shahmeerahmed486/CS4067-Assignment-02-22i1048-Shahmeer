@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, AlertCircle, XCircle } from "lucide-react"
+import { userApi, eventApi, bookingApi, notificationApi } from "@/lib/api/api-client"
 
 type ServiceStatusType = "operational" | "degraded" | "outage"
 
@@ -18,36 +19,54 @@ export function ServiceStatus() {
         { name: "Event Service", status: "operational", lastUpdated: "" },
         { name: "Booking Service", status: "operational", lastUpdated: "" },
         { name: "Notification Service", status: "operational", lastUpdated: "" },
-        { name: "MongoDB", status: "operational", lastUpdated: "" },
-        { name: "PostgreSQL", status: "operational", lastUpdated: "" },
-        { name: "RabbitMQ", status: "operational", lastUpdated: "" },
     ])
 
     useEffect(() => {
-        // Simulate fetching service status
-        const fetchServiceStatus = async () => {
-            try {
-                // In a real app, this would be an API call
-                // const status = await fetch('/api/system/status').then(res => res.json())
+        const checkServiceStatus = async () => {
+            const now = new Date().toISOString()
+            const updatedServices = [...services]
 
-                // Simulated data
-                const now = new Date().toISOString()
-                setServices([
-                    { name: "User Service", status: "operational", lastUpdated: now },
-                    { name: "Event Service", status: "operational", lastUpdated: now },
-                    { name: "Booking Service", status: "degraded", lastUpdated: now },
-                    { name: "Notification Service", status: "operational", lastUpdated: now },
-                    { name: "MongoDB", status: "operational", lastUpdated: now },
-                    { name: "PostgreSQL", status: "operational", lastUpdated: now },
-                    { name: "RabbitMQ", status: "outage", lastUpdated: now },
-                ])
+            // Check User Service
+            try {
+                await userApi.get("/")
+                updatedServices[0] = { ...updatedServices[0], status: "operational", lastUpdated: now }
             } catch (error) {
-                console.error("Failed to fetch service status:", error)
+                console.error("User service check failed:", error)
+                updatedServices[0] = { ...updatedServices[0], status: "outage", lastUpdated: now }
             }
+
+            // Check Event Service
+            try {
+                await eventApi.get("/events/")
+                updatedServices[1] = { ...updatedServices[1], status: "operational", lastUpdated: now }
+            } catch (error) {
+                console.error("Event service check failed:", error)
+                updatedServices[1] = { ...updatedServices[1], status: "outage", lastUpdated: now }
+            }
+
+            // Check Booking Service
+            try {
+                await bookingApi.get("/bookings/")
+                updatedServices[2] = { ...updatedServices[2], status: "operational", lastUpdated: now }
+            } catch (error) {
+                console.error("Booking service check failed:", error)
+                updatedServices[2] = { ...updatedServices[2], status: "outage", lastUpdated: now }
+            }
+
+            // Check Notification Service
+            try {
+                await notificationApi.get("/health/")
+                updatedServices[3] = { ...updatedServices[3], status: "operational", lastUpdated: now }
+            } catch (error) {
+                console.error("Notification service check failed:", error)
+                updatedServices[3] = { ...updatedServices[3], status: "outage", lastUpdated: now }
+            }
+
+            setServices(updatedServices)
         }
 
-        fetchServiceStatus()
-    }, [])
+        checkServiceStatus()
+    }, [services])
 
     const getStatusIcon = (status: ServiceStatusType) => {
         switch (status) {
