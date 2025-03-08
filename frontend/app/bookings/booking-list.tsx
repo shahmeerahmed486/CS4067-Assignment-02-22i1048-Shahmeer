@@ -13,7 +13,7 @@ import {
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { useToast } from '@/components/ui/use-toast'
-import { userApi } from '@/lib/api/api-client';
+import { bookingApi, userApi } from '@/lib/api/api-client';
 
 export interface Booking {
     booking_id: string;
@@ -26,7 +26,7 @@ export interface Booking {
 export const localBookingService = {
     getAllBookings: async (): Promise<Booking[]> => {
         try {
-            const response = await userApi.get('/bookings');
+            const response = await bookingApi.get('/bookings');
             return response.data;
         } catch (error) {
             console.error('Failed to fetch bookings:', error);
@@ -34,6 +34,7 @@ export const localBookingService = {
         }
     },
 };
+
 interface BookingWithDetails {
     booking_id: string;
     user_id: string;
@@ -50,43 +51,43 @@ export function BookingList() {
     const [searchQuery, setSearchQuery] = useState('')
     const { toast } = useToast()
 
-   useEffect(() => {
-    const fetchData = async () => {
-        try {
-            setLoading(true);
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                setLoading(true);
 
-            // Fetch events first to get event names
-            const eventsData = await eventService.getAllEvents();
-            const eventsMap = eventsData.reduce((acc: Record<string, any>, event: any) => {
-                acc[event.event_id] = event;
-                return acc;
-            }, {});
-            setEvents(eventsMap);
+                // Fetch events first to get event names
+                const eventsData = await eventService.getAllEvents();
+                const eventsMap = eventsData.reduce((acc: Record<string, any>, event: any) => {
+                    acc[event.event_id] = event;
+                    return acc;
+                }, {});
+                setEvents(eventsMap);
 
-            // Fetch bookings
-            const bookingsData = await localBookingService.getAllBookings();
+                // Fetch bookings
+                const bookingsData = await localBookingService.getAllBookings();
 
-            // Enrich bookings with event names
-            const enrichedBookings = bookingsData.map((booking: BookingWithDetails) => ({
-                ...booking,
-                eventName: eventsMap[booking.event_id]?.name || 'Unknown Event',
-            }));
+                // Enrich bookings with event names
+                const enrichedBookings = bookingsData.map((booking: BookingWithDetails) => ({
+                    ...booking,
+                    eventName: eventsMap[booking.event_id]?.name || 'Unknown Event',
+                }));
 
-            setBookings(enrichedBookings);
-        } catch (error) {
-            console.error('Failed to fetch data:', error);
-            toast({
-                title: 'Error',
-                description: error instanceof Error ? error.message : 'Failed to load bookings',
-                variant: 'destructive',
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+                setBookings(enrichedBookings);
+            } catch (error) {
+                console.error('Failed to fetch data:', error);
+                toast({
+                    title: 'Error',
+                    description: error instanceof Error ? error.message : 'Failed to load bookings',
+                    variant: 'destructive',
+                });
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    fetchData();
-}, [toast]);
+        fetchData();
+    }, [toast]);
 
     const filteredBookings = bookings.filter(booking =>
         booking.eventName?.toLowerCase().includes(searchQuery.toLowerCase()) ||

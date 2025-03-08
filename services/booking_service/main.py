@@ -58,7 +58,7 @@ def publish_notification(booking_id: str, user_email: str, status: str):
 def create_booking(booking: Booking):
     try:
         # Check Event Availability
-        event_response = requests.get(f"http://localhost:8001/events/{booking.event_id}/availability")
+        event_response = requests.get(f"http://localhost:8002/events/{booking.event_id}/availability")
         if event_response.status_code != 200:
             raise HTTPException(status_code=404, detail="Event not found")
         available_tickets = event_response.json()["available_tickets"]
@@ -66,22 +66,28 @@ def create_booking(booking: Booking):
             raise HTTPException(status_code=400, detail="Not enough tickets available")
 
         # Process Payment
-        if not process_payment(booking.user_id, booking.tickets * 10):  # Mock price: $10 per ticket
+        if not process_payment(booking.user_id, booking.tickets * 10):  
             raise HTTPException(status_code=400, detail="Payment failed")
 
         # Update Event Tickets
         update_response = requests.put(
-            f"http://localhost:8001/events/{booking.event_id}/update-tickets/?tickets_booked={booking.tickets}"
+            f"http://localhost:8002/events/{booking.event_id}/update-tickets/?tickets_booked={booking.tickets}"
         )
         if update_response.status_code != 200:
             raise HTTPException(status_code=500, detail="Failed to update event tickets")
+
+        # Mock getting user's email (Replace this with real authentication system)
+        user_response = requests.get(f"http://localhost:8001/users/{booking.user_id}")
+        if user_response.status_code != 200:
+            raise HTTPException(status_code=404, detail="User not found")
+        user_email = user_response.json()["email"]
 
         # Save Booking
         booking.status = "CONFIRMED"
         BOOKING_DB.append(booking.dict())
 
         # Publish Notification
-        publish_notification(booking.booking_id, "user@example.com", booking.status)  # Replace with actual user email
+        publish_notification(booking.booking_id, user_email, booking.status)
 
         return {"message": "Booking confirmed successfully"}
     except Exception as e:
