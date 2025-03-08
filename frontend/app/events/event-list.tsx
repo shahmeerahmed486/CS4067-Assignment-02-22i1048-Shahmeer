@@ -33,28 +33,27 @@ export function EventList() {
     const [loading, setLoading] = useState(true)
     const [searchQuery, setSearchQuery] = useState("")
 
-    // Inside the useEffect hook
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                setLoading(true);
-                const data = await eventService.getAllEvents();
-                setEvents(data);
-                setLoading(false);
+                setLoading(true)
+                const data = await eventService.getAllEvents()
+                setEvents(data)
+                setLoading(false)
             } catch (error) {
-                console.error('Failed to fetch events:', error);
-                setLoading(false);
+                console.error("Failed to fetch events:", error)
+                setLoading(false)
             }
-        };
+        }
 
-        fetchEvents();
-    }, []);
+        fetchEvents()
+    }, [])
 
     const filteredEvents = events.filter(
         (event) =>
-            event.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            event.location.toLowerCase().includes(searchQuery.toLowerCase()),
+            (event.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (event.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+            (event.location || "").toLowerCase().includes(searchQuery.toLowerCase())
     )
 
     const formatDate = (dateString: string) => {
@@ -129,20 +128,20 @@ export function EventList() {
                     </TableHeader>
                     <TableBody>
                         {loading ? (
-                            <TableRow>
+                            <TableRow key="loading">
                                 <TableCell colSpan={6} className="text-center py-8">
                                     Loading events...
                                 </TableCell>
                             </TableRow>
                         ) : filteredEvents.length === 0 ? (
-                            <TableRow>
+                            <TableRow key="no-events">
                                 <TableCell colSpan={6} className="text-center py-8">
                                     No events found.
                                 </TableCell>
                             </TableRow>
                         ) : (
-                            filteredEvents.map((event) => (
-                                <TableRow key={event.id}>
+                            filteredEvents.map((event, index) => (
+                                <TableRow key={event.id || index}>
                                     <TableCell>
                                         <div>
                                             <div className="font-medium">{event.title}</div>
@@ -198,4 +197,3 @@ export function EventList() {
         </div>
     )
 }
-
