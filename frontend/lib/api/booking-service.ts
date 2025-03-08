@@ -13,31 +13,31 @@ export interface Booking {
 export const bookingService = {
     createBooking: async (bookingData: Omit<Booking, "booking_id"> & { booking_id?: string }) => {
         try {
-            // Generate a random ID if not provided
-            const booking = {
+            // Ensure booking ID is always a valid string
+            const booking: Booking = {
                 ...bookingData,
-                booking_id: bookingData.booking_id || Math.random().toString(36).substring(2, 15),
+                booking_id: bookingData.booking_id || crypto.randomUUID(), // Use `crypto.randomUUID()` for uniqueness
             }
 
             // Create the booking
             const response = await bookingApi.post("/bookings/", booking)
 
-            // Get user information for notification
-            const user = await userService.getUserById(booking.user_id)
+            // Fetch user info for notification
+            const user = await userService.getUserById(booking.user_id).catch(() => null)
 
-            if (user && user.email) {
-                // Automatically send a notification
+            if (user?.email) {
+                // Send notification
                 await notificationService.sendNotification({
                     recipient: user.email,
                     subject: "Booking Confirmation",
                     message: `Your booking (ID: ${booking.booking_id}) for ${booking.tickets} ticket(s) has been confirmed.`,
-                })
+                }).catch((err) => console.error("Failed to send notification:", err))
             }
 
             return response.data
         } catch (error) {
             console.error("Failed to create booking:", error)
-            throw error
+            throw new Error("Booking creation failed. Please try again.")
         }
     },
 
@@ -46,10 +46,8 @@ export const bookingService = {
             const response = await bookingApi.get("/bookings/")
             return response.data || []
         } catch (error) {
-            console.error("Failed to get all bookings:", error)
-            // Return fallback data
+            console.error("Failed to fetch bookings:", error)
             return []
         }
     },
 }
-
