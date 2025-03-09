@@ -1,37 +1,33 @@
-"use client" // Add this directive to mark the component as a client component
+import { DashboardStats } from "@/components/dashboard-stats";
+import { RecentActivity } from "@/components/recent-activity";
+import { ServiceStatus } from "@/components/service-status";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
-import type React from "react"
-import { Sidebar } from "@/components/sidebar"
-import { Header } from "@/components/header"
-import { useAuth } from "@/lib/auth-context"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
-
-export default function DashboardLayout({
-    children,
-}: {
-    children: React.ReactNode
-}) {
-    const { isAuthenticated } = useAuth()
-    const router = useRouter()
-
-    useEffect(() => {
-        if (!isAuthenticated) {
-            router.push("/login") // Redirect to login if not authenticated
-        }
-    }, [isAuthenticated, router])
-
-    // if (!isAuthenticated) {
-    //     return null // Render nothing while redirecting
-    // }
-
+export default function DashboardPage() {
     return (
-        <div className="flex min-h-screen flex-col">
-            <Header />
-            <div className="flex flex-1">
-                <Sidebar />
-                <main className="flex-1 p-6 md:p-8">{children}</main>
+        <div className="space-y-6">
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <DashboardStats />
+            <div className="grid gap-6 md:grid-cols-2">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Service Status</CardTitle>
+                        <CardDescription>Current status of all microservices</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ServiceStatus />
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Recent Activity</CardTitle>
+                        <CardDescription>Latest actions across all services</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <RecentActivity />
+                    </CardContent>
+                </Card>
             </div>
         </div>
-    )
+    );
 }
