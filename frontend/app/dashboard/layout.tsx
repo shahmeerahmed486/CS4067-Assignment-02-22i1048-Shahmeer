@@ -2,6 +2,7 @@ import type React from "react"
 import { Sidebar } from "@/components/sidebar"
 import { Header } from "@/components/header"
 
+// IMPORTANT: Remove the authentication check for now
 export default function DashboardLayout({
     children,
 }: {
@@ -17,4 +18,3 @@ export default function DashboardLayout({
         </div>
     )
 }
-

@@ -11,38 +11,33 @@ export interface Booking {
 }
 
 export const bookingService = {
-    createBooking: async (bookingData: Omit<Booking, "booking_id"> & { booking_id?: string }) => {
+    createBooking: async (bookingData: Partial<Booking>) => {
         try {
-            // Create a minimal payload with only the required fields
+            // ✅ Ensure `status` is always included
             const payload = {
                 user_id: bookingData.user_id,
                 event_id: bookingData.event_id,
                 tickets: Number(bookingData.tickets),
-                // Let the API handle defaults for booking_id and status
+                status: bookingData.status ?? "PENDING",  // ✅ Fix: Always send status
             }
 
             console.log("🚀 Sending booking request:", payload)
 
-            // Create the booking
             const response = await bookingApi.post("/bookings/", payload)
 
-            // Fetch user info for notification
-            const user = await userService.getUserById(payload.user_id).catch(() => null)
+            // ✅ Fetch user info for notification
+            const user = await userService.getUserById(payload.user_id!).catch(() => null)
 
             if (user?.email) {
-                // Send notification
-                await notificationService
-                    .sendNotification({
-                        recipient: user.email,
-                        subject: "Booking Confirmation",
-                        message: `Your booking for ${payload.tickets} ticket(s) has been confirmed.`,
-                    })
-                    .catch((err) => console.error("Failed to send notification:", err))
+                await notificationService.sendNotification({
+                    recipient: user.email,
+                    subject: "Booking Confirmation",
+                    message: `Your booking for ${payload.tickets} ticket(s) has been confirmed.`,
+                }).catch((err) => console.error("Failed to send notification:", err))
             }
 
             return response.data
         } catch (error: any) {
-            // Log the detailed error response for debugging
             if (error.response) {
                 console.error("Error response:", {
                     status: error.response.status,
@@ -50,10 +45,14 @@ export const bookingService = {
                     headers: error.response.headers,
                 })
             }
-            console.error("Failed to create booking:", error)
+            console.error("❌ Failed to create booking:", error)
             throw error
         }
     },
+    getAllBookings: async () => {
+        // implementation to fetch all bookings
+        return []; // replace with actual fetch logic
+    }
 }
 
 
