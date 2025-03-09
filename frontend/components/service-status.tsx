@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle, AlertCircle, XCircle } from "lucide-react"
 import { userApi, eventApi, bookingApi, notificationApi } from "@/lib/api/api-client"
@@ -14,59 +14,57 @@ type Service = {
 }
 
 export function ServiceStatus() {
-    const [services, setServices] = useState<Service[]>([
+    // ✅ Store service statuses in a ref instead of state
+    const serviceStatusRef = useRef<Service[]>([
         { name: "User Service", status: "operational", lastUpdated: "" },
         { name: "Event Service", status: "operational", lastUpdated: "" },
         { name: "Booking Service", status: "operational", lastUpdated: "" },
         { name: "Notification Service", status: "operational", lastUpdated: "" },
-    ])
+    ]);
+
+    const [services, setServices] = useState<Service[]>(serviceStatusRef.current);
 
     useEffect(() => {
         const checkServiceStatus = async () => {
-            const now = new Date().toISOString()
-            const updatedServices = [...services]
+            const now = new Date().toISOString();
+            let updatedServices = [...serviceStatusRef.current];
 
-            // Check User Service
             try {
-                await userApi.get("/")
-                updatedServices[0] = { ...updatedServices[0], status: "operational", lastUpdated: now }
-            } catch (error) {
-                console.error("User service check failed:", error)
-                updatedServices[0] = { ...updatedServices[0], status: "outage", lastUpdated: now }
+                await userApi.get("/");
+                updatedServices[0] = { ...updatedServices[0], status: "operational", lastUpdated: now };
+            } catch {
+                updatedServices[0] = { ...updatedServices[0], status: "outage", lastUpdated: now };
             }
 
-            // Check Event Service
             try {
-                await eventApi.get("/events/")
-                updatedServices[1] = { ...updatedServices[1], status: "operational", lastUpdated: now }
-            } catch (error) {
-                console.error("Event service check failed:", error)
-                updatedServices[1] = { ...updatedServices[1], status: "outage", lastUpdated: now }
+                await eventApi.get("/events/");
+                updatedServices[1] = { ...updatedServices[1], status: "operational", lastUpdated: now };
+            } catch {
+                updatedServices[1] = { ...updatedServices[1], status: "outage", lastUpdated: now };
             }
 
-            // Check Booking Service
             try {
-                await bookingApi.get("/bookings/")
-                updatedServices[2] = { ...updatedServices[2], status: "operational", lastUpdated: now }
-            } catch (error) {
-                console.error("Booking service check failed:", error)
-                updatedServices[2] = { ...updatedServices[2], status: "outage", lastUpdated: now }
+                await bookingApi.get("/bookings/");
+                updatedServices[2] = { ...updatedServices[2], status: "operational", lastUpdated: now };
+            } catch {
+                updatedServices[2] = { ...updatedServices[2], status: "outage", lastUpdated: now };
             }
 
-            // Check Notification Service
             try {
-                await notificationApi.get("/health/")
-                updatedServices[3] = { ...updatedServices[3], status: "operational", lastUpdated: now }
-            } catch (error) {
-                console.error("Notification service check failed:", error)
-                updatedServices[3] = { ...updatedServices[3], status: "outage", lastUpdated: now }
+                await notificationApi.get("/health/");
+                updatedServices[3] = { ...updatedServices[3], status: "operational", lastUpdated: now };
+            } catch {
+                updatedServices[3] = { ...updatedServices[3], status: "outage", lastUpdated: now };
             }
 
-            setServices(updatedServices)
-        }
+            // ✅ Update the ref without triggering a re-render
+            serviceStatusRef.current = updatedServices;
+            setServices(updatedServices); // This updates UI without triggering an infinite loop
+        };
 
-        checkServiceStatus()
-    }, [services])
+        checkServiceStatus();
+    }, []); // ✅ Only run once when component mounts
+
 
     const getStatusIcon = (status: ServiceStatusType) => {
         switch (status) {
