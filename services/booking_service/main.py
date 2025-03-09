@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 import uuid
 from sqlalchemy.orm import Session
-from models import Booking
+from models import Booking  # Import Booking from models
 from database import engine, Base, get_db
 
 app = FastAPI()
@@ -34,8 +34,7 @@ RABBITMQ_HOST = "localhost"
 RABBITMQ_QUEUE = "booking_notifications"
 
 # Booking Model (Pydantic)
-class Booking(BaseModel):
-    booking_id: Optional[str] = Field(None, example="abc123xyz")
+class BookingCreate(BaseModel):
     user_id: str = Field(..., example="user123")
     event_id: str = Field(..., example="event456")
     tickets: int = Field(..., gt=0, example=2)  # Must be > 0
@@ -64,7 +63,7 @@ def publish_notification(booking_id: str, user_email: str, status: str):
 
 # Create Booking
 @app.post("/bookings/")
-async def create_booking(booking: Booking, db: Session = Depends(get_db)):
+async def create_booking(booking: BookingCreate, db: Session = Depends(get_db)):
     try:
         logger.info("📩 Received Booking Request: %s", booking.model_dump())  # Use model_dump()
 
@@ -98,12 +97,11 @@ async def create_booking(booking: Booking, db: Session = Depends(get_db)):
             raise HTTPException(status_code=500, detail="User email not found")
 
         # Assign Booking ID if Not Provided
-        if not booking.booking_id:
-            booking.booking_id = str(uuid.uuid4())[:10]  # Proper random ID
+        booking_id = str(uuid.uuid4())[:10]  # Proper random ID
 
         # Save Booking to Database
         db_booking = Booking(
-            booking_id=booking.booking_id,
+            booking_id=booking_id,
             user_id=booking.user_id,
             event_id=booking.event_id,
             tickets=booking.tickets,
@@ -114,9 +112,9 @@ async def create_booking(booking: Booking, db: Session = Depends(get_db)):
         db.refresh(db_booking)
 
         # Publish Notification
-        publish_notification(booking.booking_id, user_email, booking.status)
+        publish_notification(booking_id, user_email, "CONFIRMED")
 
-        return {"message": "✅ Booking confirmed successfully", "booking_id": booking.booking_id}
+        return {"message": "✅ Booking confirmed successfully", "booking_id": booking_id}
 
     except requests.RequestException as req_err:
         logger.error(f"❌ External API error: {req_err}")
