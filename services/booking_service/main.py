@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, Field
 import requests
 import pika
@@ -6,6 +6,7 @@ import json
 import logging
 from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
+import uuid
 
 app = FastAPI()
 
@@ -58,13 +59,15 @@ def publish_notification(booking_id: str, user_email: str, status: str):
 
 # ✅ Create Booking
 @app.post("/bookings/")
-def create_booking(booking: Booking):
+async def create_booking(booking: Booking, request: Request):
     try:
+        logger.info("Received booking request: %s", await request.json())
+
         # ✅ Validate Event Availability
         event_response = requests.get(f"http://localhost:8002/events/{booking.event_id}/availability")
         if event_response.status_code != 200:
             raise HTTPException(status_code=404, detail="Event not found")
-        
+
         available_tickets = event_response.json().get("available_tickets", 0)
         if booking.tickets > available_tickets:
             raise HTTPException(status_code=400, detail="Not enough tickets available")
@@ -84,28 +87,28 @@ def create_booking(booking: Booking):
         user_response = requests.get(f"http://localhost:8001/users/{booking.user_id}")
         if user_response.status_code != 200:
             raise HTTPException(status_code=404, detail="User not found")
-        
+
         user_email = user_response.json().get("email")
         if not user_email:
             raise HTTPException(status_code=500, detail="User email not found")
 
         # ✅ Assign Booking ID if Not Provided
         if not booking.booking_id:
-            booking.booking_id = json.dumps(booking.dict()).encode().hex()[:10]  # Generate a unique ID
+            booking.booking_id = str(uuid.uuid4())[:10]  # Proper random ID
 
         # ✅ Save Booking
         booking.status = "CONFIRMED"
-        BOOKING_DB.append(booking.model_dump())  # Corrected from .dict()
+        BOOKING_DB.append(booking.dict())  # Corrected from .dict()
 
         # ✅ Publish Notification
         publish_notification(booking.booking_id, user_email, booking.status)
 
         return {"message": "✅ Booking confirmed successfully", "booking_id": booking.booking_id}
-    
+
     except requests.RequestException as req_err:
         logger.error(f"❌ External API error: {req_err}")
         raise HTTPException(status_code=502, detail="Error communicating with external service")
-    
+
     except Exception as e:
         logger.error(f"❌ Error creating booking: {e}")
         raise HTTPException(status_code=500, detail="An unexpected error occurred")
