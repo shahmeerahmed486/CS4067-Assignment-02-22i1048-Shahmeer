@@ -48,11 +48,7 @@ const routes = [
 
 export function Sidebar() {
     const pathname = usePathname()
-    const { isAuthenticated, logout } = useAuth()
-
-    if (!isAuthenticated) {
-        return null
-    }
+    const { logout } = useAuth()
 
     return (
         <aside className="hidden w-64 flex-col border-r bg-muted/40 md:flex">
