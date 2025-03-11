@@ -27,7 +27,7 @@ export function ServiceStatus() {
     useEffect(() => {
         const checkServiceStatus = async () => {
             const now = new Date().toISOString();
-            let updatedServices = [...serviceStatusRef.current];
+            const updatedServices = [...serviceStatusRef.current];
 
             try {
                 await userApi.get("/");

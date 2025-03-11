@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { bookingService } from '@/lib/api/booking-service'
 import { eventService } from '@/lib/api/event-service'
 import {
     Table,
