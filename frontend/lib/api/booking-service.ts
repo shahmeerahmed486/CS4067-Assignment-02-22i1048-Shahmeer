@@ -25,17 +25,6 @@ export const bookingService = {
 
             const response = await bookingApi.post("/bookings/", payload);
 
-            // Fetch user info for notification
-            const user = await userService.getUserById(payload.user_id!).catch(() => null);
-
-            if (user?.email) {
-                await notificationService.sendNotification({
-                    recipient: user.email,
-                    subject: "Booking Confirmation",
-                    message: `Your booking for ${payload.tickets} ticket(s) has been confirmed.`,
-                }).catch((err) => console.error("Failed to send notification:", err));
-            }
-
             return response.data;
         } catch (error: any) {
             if (error.response) {

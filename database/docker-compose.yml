@@ -1,7 +1,7 @@
 services:
   # PostgreSQL for User Service
   postgres_user:
-    image: postgres:latest
+    image: postgres:alpine # Lightweight Alpine-based PostgreSQL
     container_name: postgres_user_db
     restart: always
     environment:
@@ -15,7 +15,7 @@ services:
 
   # PostgreSQL for Booking Service
   postgres_booking:
-    image: postgres:latest
+    image: postgres:alpine # Lightweight Alpine-based PostgreSQL
     container_name: postgres_booking_db
     restart: always
     environment:
@@ -49,7 +49,7 @@ services:
 
   # RabbitMQ Message Broker
   rabbitmq:
-    image: rabbitmq:3-management # Includes management UI
+    image: rabbitmq:3-management-alpine # Lightweight Alpine-based RabbitMQ with management UI
     container_name: rabbitmq
     restart: always
     environment:
@@ -64,5 +64,3 @@ volumes:
   pg_booking_data:
   mongo_notification_data:
   mongo_event_data:
-
-

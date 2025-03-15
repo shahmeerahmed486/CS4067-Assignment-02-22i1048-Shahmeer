@@ -1,0 +1,97 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-databases
+  namespace: onlineeventbooking-shahmeer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb-databases
+  template:
+    metadata:
+      labels:
+        app: mongodb-databases
+    spec:
+      containers:
+        - name: mongo-event
+          image: mongo:latest
+          ports:
+            - containerPort: 27018
+          command: ["mongod", "--port", "27018"]  # Add this line
+          volumeMounts:
+            - name: mongo-event-storage
+              mountPath: /data/db
+
+        - name: mongo-notification
+          image: mongo:latest
+          ports:
+            - containerPort: 27019
+          command: ["mongod", "--port", "27019"]  # Add this line
+          volumeMounts:
+            - name: mongo-notification-storage
+              mountPath: /data/db
+
+      volumes:
+        - name: mongo-event-storage
+          persistentVolumeClaim:
+            claimName: mongo-event-pvc
+        - name: mongo-notification-storage
+          persistentVolumeClaim:
+            claimName: mongo-notification-pvc
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-event-pvc
+  namespace: onlineeventbooking-shahmeer
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-notification-pvc
+  namespace: onlineeventbooking-shahmeer
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-event
+  namespace: onlineeventbooking-shahmeer
+spec:
+  selector:
+    app: mongodb-databases
+  ports:
+    - protocol: TCP
+      port: 27018
+      targetPort: 27018
+  type: ClusterIP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongo-notification
+  namespace: onlineeventbooking-shahmeer
+spec:
+  selector:
+    app: mongodb-databases
+  ports:
+    - protocol: TCP
+      port: 27019  # Use the same port as in the container
+      targetPort: 27019
+  type: ClusterIP

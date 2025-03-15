@@ -3,8 +3,9 @@ from pydantic import BaseModel
 from pymongo import MongoClient
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
-app = FastAPI()
+import os
 
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -14,8 +15,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# MongoDB Connection
-MONGO_URI = "mongodb://localhost:27019/"
+# Use environment variable for MongoDB URI
+MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017/")
 client = MongoClient(MONGO_URI)
 db = client.event_service
 events_collection = db.events

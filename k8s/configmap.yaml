@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: event-booking-config
+  namespace: onlineeventbooking-shahmeer
+data:
+  # API URLs for microservices (used inside services)
+  USER_SERVICE_URL: "http://user-service:8001"
+  EVENT_SERVICE_URL: "http://event-service:8002"
+  BOOKING_SERVICE_URL: "http://booking-service:8003"
+  NOTIFICATION_SERVICE_URL: "http://notification-service:8004"
+
+  # RabbitMQ Hostname
+  RABBITMQ_HOST: "rabbitmq"

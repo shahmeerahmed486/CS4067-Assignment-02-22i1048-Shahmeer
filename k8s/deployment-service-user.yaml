@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: onlineeventbooking-shahmeer
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: user-service
+  template:
+    metadata:
+      labels:
+        app: user-service
+    spec:
+      containers:
+        - name: user-service
+          image: 22i1048/user_service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8001
+          envFrom:
+            - configMapRef:
+                name: event-booking-config
+          env:
+            - name: DATABASE_URL
+              value: postgresql://admin:password@postgres-user:5432/user_service
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-service
+  namespace: onlineeventbooking-shahmeer
+spec:
+  selector:
+    app: user-service
+  ports:
+    - protocol: TCP
+      port: 8001
+      targetPort: 8001
+  type: ClusterIP

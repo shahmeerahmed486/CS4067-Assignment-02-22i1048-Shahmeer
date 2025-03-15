@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notification-service
+  namespace: onlineeventbooking-shahmeer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notification-service
+  template:
+    metadata:
+      labels:
+        app: notification-service
+    spec:
+      containers:
+        - name: notification-service
+          image: 22i1048/notification_service:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8004
+          envFrom:
+            - configMapRef:
+                name: event-booking-config
+          env:
+            - name: MONGO_URI
+              value: mongodb://mongo-notification:27018/  # Updated to 27018
+            - name: RABBITMQ_HOST
+              value: rabbitmq
+            - name: EMAIL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: event-booking-secrets
+                  key: email_user
+            - name: EMAIL_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: event-booking-secrets
+                  key: email_pass
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notification-service
+  namespace: onlineeventbooking-shahmeer
+spec:
+  selector:
+    app: notification-service
+  ports:
+    - protocol: TCP
+      port: 8004
+      targetPort: 8004
+  type: ClusterIP
