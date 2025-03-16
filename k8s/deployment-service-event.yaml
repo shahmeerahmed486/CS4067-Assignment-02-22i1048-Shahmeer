@@ -4,7 +4,7 @@ metadata:
   name: event-service
   namespace: onlineeventbooking-shahmeer
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: event-service
