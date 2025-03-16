@@ -16,7 +16,7 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -27,9 +27,11 @@ logger = logging.getLogger(__name__)
 
 Base.metadata.create_all(bind=engine)
 
-# Use environment variables for RabbitMQ and Event Service
-RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
-EVENT_SERVICE_URL = os.getenv("EVENT_SERVICE_URL", "http://localhost:8002")
+# Use environment variables for RabbitMQ, Event Service, User Service, and Notification Service
+RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "rabbitmq")
+EVENT_SERVICE_URL = os.getenv("EVENT_SERVICE_URL", "http://event-service:8002")
+USER_SERVICE_URL = os.getenv("USER_SERVICE_URL", "http://user-service:8001")
+NOTIFICATION_SERVICE_URL = os.getenv("NOTIFICATION_SERVICE_URL", "http://notification-service:8004")
 
 RABBITMQ_QUEUE = "booking_notifications"
 
@@ -63,7 +65,7 @@ async def create_booking(booking: BookingCreate, db: Session = Depends(get_db)):
     try:
         logger.info("📩 Received Booking Request: %s", booking.model_dump())
 
-        # Use EVENT_SERVICE_URL from environment variable
+        # Check event availability using EVENT_SERVICE_URL
         event_response = requests.get(f"{EVENT_SERVICE_URL}/events/{booking.event_id}/availability")
         if event_response.status_code != 200:
             raise HTTPException(status_code=404, detail="Event not found")
@@ -72,16 +74,19 @@ async def create_booking(booking: BookingCreate, db: Session = Depends(get_db)):
         if booking.tickets > available_tickets:
             raise HTTPException(status_code=400, detail="Not enough tickets available")
 
+        # Process payment (mock implementation)
         if not process_payment(booking.user_id, booking.tickets * 10):
             raise HTTPException(status_code=400, detail="Payment failed")
 
+        # Update event tickets using EVENT_SERVICE_URL
         update_response = requests.put(
             f"{EVENT_SERVICE_URL}/events/{booking.event_id}/update-tickets?tickets_booked={booking.tickets}"
         )
         if update_response.status_code != 200:
             raise HTTPException(status_code=500, detail="Failed to update event tickets")
 
-        user_response = requests.get(f"http://user_service:8001/users/{booking.user_id}")
+        # Fetch user details using USER_SERVICE_URL
+        user_response = requests.get(f"{USER_SERVICE_URL}/users/{booking.user_id}")
         if user_response.status_code != 200:
             raise HTTPException(status_code=404, detail="User not found")
 
@@ -89,8 +94,8 @@ async def create_booking(booking: BookingCreate, db: Session = Depends(get_db)):
         if not user_email:
             raise HTTPException(status_code=500, detail="User email not found")
 
+        # Create booking in the database
         booking_id = str(uuid.uuid4())[:10]
-
         db_booking = Booking(
             booking_id=booking_id,
             user_id=booking.user_id,
@@ -102,6 +107,7 @@ async def create_booking(booking: BookingCreate, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(db_booking)
 
+        # Publish notification to RabbitMQ
         publish_notification(booking_id, user_email, "CONFIRMED", booking.tickets)
 
         return {"message": "✅ Booking confirmed successfully", "booking_id": booking_id}

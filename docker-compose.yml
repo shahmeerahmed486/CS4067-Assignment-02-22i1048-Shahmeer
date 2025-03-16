@@ -1,7 +1,7 @@
 services:
   # PostgreSQL for User Service
   postgres_user:
-    image: postgres:alpine # Lightweight Alpine-based PostgreSQL
+    image: postgres:latest
     container_name: postgres_user_db
     restart: always
     environment:
@@ -15,7 +15,7 @@ services:
 
   # PostgreSQL for Booking Service
   postgres_booking:
-    image: postgres:alpine # Lightweight Alpine-based PostgreSQL
+    image: postgres:latest
     container_name: postgres_booking_db
     restart: always
     environment:
@@ -101,6 +101,9 @@ services:
     environment:
       DATABASE_URL: postgresql://admin:password@postgres_booking:5432/booking_service
       RABBITMQ_HOST: rabbitmq
+      EVENT_SERVICE_URL: http://event_service:8002
+      USER_SERVICE_URL: http://user_service:8001
+      NOTIFICATION_SERVICE_URL: http://notification_service:8004
 
   # Notification Service
   notification_service:
