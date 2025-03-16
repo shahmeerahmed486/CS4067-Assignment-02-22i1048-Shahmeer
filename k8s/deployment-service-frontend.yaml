@@ -13,6 +13,10 @@ spec:
       labels:
         app: frontend
     spec:
+      initContainers:
+        - name: wait-for-notification
+          image: busybox
+          command: ['sh', '-c', 'until nc -z notification-service 8004; do echo waiting for Notification Service; sleep 2; done']
       containers:
         - name: frontend
           image: 22i1048/frontend:latest

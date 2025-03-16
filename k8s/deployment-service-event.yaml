@@ -13,6 +13,10 @@ spec:
       labels:
         app: event-service
     spec:
+      initContainers:
+        - name: wait-for-mongo
+          image: busybox
+          command: ['sh', '-c', 'until nc -z mongo-event 27018; do echo waiting for MongoDB; sleep 2; done']
       containers:
         - name: event-service
           image: 22i1048/event_service:latest

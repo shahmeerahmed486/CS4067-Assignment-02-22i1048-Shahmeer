@@ -13,6 +13,10 @@ spec:
       labels:
         app: notification-service
     spec:
+      initContainers:
+        - name: wait-for-booking
+          image: busybox
+          command: ['sh', '-c', 'until nc -z booking-service 8003 && nc -z mongo-notification 27019; do echo waiting for Booking Service and mongo; sleep 2; done']
       containers:
         - name: notification-service
           image: 22i1048/notification_service:latest
