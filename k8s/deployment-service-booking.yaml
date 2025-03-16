@@ -31,7 +31,7 @@ spec:
                 name: event-booking-config
           env:
             - name: DATABASE_URL
-              value: postgresql://admin:password@postgres-booking:5432/booking_service
+              value: postgresql://admin:password@postgres-booking:5433/booking_service
             - name: RABBITMQ_HOST
               value: rabbitmq
 

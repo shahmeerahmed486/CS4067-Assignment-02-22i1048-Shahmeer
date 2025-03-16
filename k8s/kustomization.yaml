@@ -5,8 +5,8 @@ resources:
   - namespace.yaml
   - configmap.yaml
   - secrets.yaml
-  - database-service-database.yaml
-  - database-service-mongodb.yaml
+  - deployment-service-database.yaml
+  - deployment-service-mongodb.yaml
   - deployment-service-rabbitmq.yaml
   - deployment-service-user.yaml
   - deployment-service-event.yaml

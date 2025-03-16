@@ -14,9 +14,12 @@ spec:
         app: notification-service
     spec:
       initContainers:
-        - name: wait-for-booking
+        - name: wait-for-mongo
           image: busybox
-          command: ['sh', '-c', 'until nc -z booking-service 8003 && nc -z mongo-notification 27019; do echo waiting for Booking Service and mongo; sleep 2; done']
+          command: ['sh', '-c', 'until nc -z mongo-notification 27019; do echo waiting for MongoDB; sleep 2; done']
+        - name: wait-for-rabbitmq
+          image: busybox
+          command: ['sh', '-c', 'until nc -z rabbitmq 5672; do echo waiting for RabbitMQ; sleep 2; done']
       containers:
         - name: notification-service
           image: 22i1048/notification_service:latest
@@ -28,7 +31,7 @@ spec:
                 name: event-booking-config
           env:
             - name: MONGO_URI
-              value: mongodb://mongo-notification:27018/  # Updated to 27018
+              value: mongodb://mongo-notification:27017/
             - name: RABBITMQ_HOST
               value: rabbitmq
             - name: EMAIL_USER

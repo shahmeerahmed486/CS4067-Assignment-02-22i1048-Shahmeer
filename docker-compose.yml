@@ -1,7 +1,7 @@
 services:
   # PostgreSQL for User Service
   postgres_user:
-    image: postgres:latest
+    image: postgres:alpine
     container_name: postgres_user_db
     restart: always
     environment:
@@ -15,7 +15,7 @@ services:
 
   # PostgreSQL for Booking Service
   postgres_booking:
-    image: postgres:latest
+    image: postgres:alpine
     container_name: postgres_booking_db
     restart: always
     environment:
