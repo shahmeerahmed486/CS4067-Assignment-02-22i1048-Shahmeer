@@ -18,7 +18,12 @@ spec:
           image: mongo:latest
           ports:
             - containerPort: 27018
-          command: ["mongod", "--port", "27018"]  # Add this line
+          command: 
+            - mongod
+            - "--port"
+            - "27018"
+            - "--bind_ip"
+            - "0.0.0.0"  # Bind to all interfaces
           volumeMounts:
             - name: mongo-event-storage
               mountPath: /data/db
@@ -27,7 +32,12 @@ spec:
           image: mongo:latest
           ports:
             - containerPort: 27019
-          command: ["mongod", "--port", "27019"]  # Add this line
+          command: 
+            - mongod
+            - "--port"
+            - "27019"
+            - "--bind_ip"
+            - "0.0.0.0"  # Bind to all interfaces
           volumeMounts:
             - name: mongo-notification-storage
               mountPath: /data/db

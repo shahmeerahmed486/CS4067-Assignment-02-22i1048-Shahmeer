@@ -5,9 +5,9 @@ resources:
   - namespace.yaml
   - configmap.yaml
   - secrets.yaml
-  - database-postgres.yaml
-  - database-mongodb.yaml
-  - rabbitmq.yaml
+  - deployment-service-database.yaml
+  - deployment-service-mongodb.yaml
+  - deployment-service-rabbitmq.yaml
   - deployment-service-user.yaml
   - deployment-service-event.yaml
   - deployment-service-booking.yaml

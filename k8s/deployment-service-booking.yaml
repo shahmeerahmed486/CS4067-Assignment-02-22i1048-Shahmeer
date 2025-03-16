@@ -4,7 +4,7 @@ metadata:
   name: booking-service
   namespace: onlineeventbooking-shahmeer
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: booking-service
@@ -13,6 +13,13 @@ spec:
       labels:
         app: booking-service
     spec:
+      initContainers:
+        - name: wait-for-postgres
+          image: busybox
+          command: ['sh', '-c', 'until nc -z postgres-booking 5433; do echo waiting for PostgreSQL; sleep 2; done']
+        - name: wait-for-rabbitmq
+          image: busybox
+          command: ['sh', '-c', 'until nc -z rabbitmq 5672; do echo waiting for RabbitMQ; sleep 2; done']
       containers:
         - name: booking-service
           image: 22i1048/booking_service:latest
@@ -24,7 +31,7 @@ spec:
                 name: event-booking-config
           env:
             - name: DATABASE_URL
-              value: postgresql://admin:password@postgres-booking:5432/booking_service
+              value: postgresql://admin:password@postgres-booking:5433/booking_service
             - name: RABBITMQ_HOST
               value: rabbitmq
 

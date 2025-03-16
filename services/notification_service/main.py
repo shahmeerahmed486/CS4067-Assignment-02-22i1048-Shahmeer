@@ -112,3 +112,27 @@ def send_notification(notification: dict):
         return {"status": "Notification sent successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Health endpoint
+@app.get("/health")
+def health_check():
+    try:
+        # Check MongoDB connection
+        client.server_info()  # Ping MongoDB
+        mongo_status = "up"
+    except Exception as e:
+        mongo_status = f"down: {str(e)}"
+
+    try:
+        # Check RabbitMQ connection
+        connection = pika.BlockingConnection(pika.ConnectionParameters(RABBITMQ_HOST))
+        connection.close()
+        rabbitmq_status = "up"
+    except Exception as e:
+        rabbitmq_status = f"down: {str(e)}"
+
+    return {
+        "status": "ok",
+        "mongo": mongo_status,
+        "rabbitmq": rabbitmq_status,
+    }
