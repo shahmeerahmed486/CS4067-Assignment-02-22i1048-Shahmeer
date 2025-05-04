@@ -36,3 +36,24 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# Config and Environment Files
+*.env
+.env.*
+.env.local
+.env.*.local
+*.config.js
+*.config.ts
+*.json
+
+# IDE/Editor config files (VS Code, IntelliJ, etc.)
+.vscode/
+.idea/
+
+# Operating system files
+Thumbs.db
+ehthumbs.db
