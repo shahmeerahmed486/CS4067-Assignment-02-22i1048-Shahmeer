@@ -2,6 +2,9 @@
 
 # dependencies
 /node_modules
+/frontend/node_modules  # Frontend specific node_modules folder
+/frontend/node_modules
+frontend/event-booking-frontend/node_modules
 /.pnp
 .pnp.*
 .yarn/*
@@ -41,19 +44,15 @@ next-env.d.ts
 __pycache__/
 *.py[cod]
 
-# Config and Environment Files
-*.env
-.env.*
-.env.local
-.env.*.local
-*.config.js
-*.config.ts
-*.json
+# Frontend specific files to ignore
+/frontend/.next/
+/frontend/out/
+/frontend/.env
+/frontend/.env.local
+/frontend/.env.*.local
 
-# IDE/Editor config files (VS Code, IntelliJ, etc.)
-.vscode/
-.idea/
-
-# Operating system files
-Thumbs.db
-ehthumbs.db
+# FastAPI specific files (backend)
+/backend/.env
+/backend/.env.local
+/backend/.env.*.local
+/backend/__pycache__/
