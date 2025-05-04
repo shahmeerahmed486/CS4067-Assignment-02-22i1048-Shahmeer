@@ -18,31 +18,3 @@ spec:
             name: frontend
             port:
               number: 3000
-      - path: /api/users
-        pathType: Prefix
-        backend:
-          service:
-            name: user-service
-            port:
-              number: 8001
-      - path: /api/events
-        pathType: Prefix
-        backend:
-          service:
-            name: event-service
-            port:
-              number: 8002
-      - path: /api/bookings
-        pathType: Prefix
-        backend:
-          service:
-            name: booking-service
-            port:
-              number: 8003
-      - path: /api/notifications
-        pathType: Prefix
-        backend:
-          service:
-            name: notification-service
-            port:
-              number: 8004
