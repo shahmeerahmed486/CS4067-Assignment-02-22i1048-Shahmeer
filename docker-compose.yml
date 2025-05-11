@@ -61,8 +61,9 @@ services:
 
   # User Service
   user_service:
-    build:
-      context: ./services/user_service
+   # build:
+      #context: ./services/user_service
+    image: 22i1048/user_service:latest 
     container_name: user_service
     restart: always
     ports:
@@ -74,8 +75,9 @@ services:
 
   # Event Service
   event_service:
-    build:
-      context: ./services/event_service
+   # build:
+    #  context: ./services/event_service
+    image: 22i1048/event_service:latest
     container_name: event_service
     restart: always
     ports:
@@ -87,8 +89,9 @@ services:
 
   # Booking Service
   booking_service:
-    build:
-      context: ./services/booking_service
+    #build:
+    #  context: ./services/booking_service
+    image: 22i1048/booking_service:latest
     container_name: booking_service
     restart: always
     ports:
@@ -107,8 +110,10 @@ services:
 
   # Notification Service
   notification_service:
-    build:
-      context: ./services/notification_service
+
+    #build:
+    #  context: ./services/notification_service
+    image: 22i1048/notification_service:latest
     container_name: notification_service
     restart: always
     ports:
@@ -125,8 +130,9 @@ services:
 
   # Frontend Service
   frontend:
-    build:
-      context: ./frontend
+    #build:
+    #  context: ./frontend
+    image: 22i1048/frontend:latest
     container_name: frontend
     restart: always
     ports:

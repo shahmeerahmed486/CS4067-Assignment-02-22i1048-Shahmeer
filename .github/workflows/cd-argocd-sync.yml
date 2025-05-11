@@ -1,0 +1,33 @@
+name: CD – Argo CD Sync (Windows)
+
+on:
+  push:
+    paths:
+      - 'k8s/**'
+  workflow_dispatch: {}
+
+jobs:
+  argocd-sync-windows:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install ArgoCD CLI
+        run: |
+          Invoke-WebRequest https://github.com/argoproj/argo-cd/releases/latest/download/argocd-windows-amd64.exe -OutFile argocd.exe
+          Move-Item argocd.exe $Env:USERPROFILE\argocd.exe
+          $Env:Path += ";$Env:USERPROFILE"
+
+      - name: Login to ArgoCD
+        run: |
+          argocd login ${{ secrets.ARGOCD_SERVER }} `
+            --username ${{ secrets.ARGOCD_USERNAME }} `
+            --password ${{ secrets.ARGOCD_PASSWORD }} `
+            --insecure
+
+      - name: Sync ArgoCD Application
+        run: |
+          argocd app sync online-event-booking
+          argocd app wait online-event-booking --health --timeout 300s
