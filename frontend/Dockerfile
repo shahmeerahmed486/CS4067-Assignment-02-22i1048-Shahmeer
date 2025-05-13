@@ -7,7 +7,10 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 
-# Copy the entire project and build it
+# Copy env file before build
+COPY .env.local .env.local
+
+# Copy the rest of the app and build it
 COPY . .
 RUN npm run build
 
@@ -19,8 +22,6 @@ WORKDIR /app
 # Copy the built files from the builder stage
 COPY --from=builder /app ./
 
-# Expose port for frontend
 EXPOSE 3000
 
-# Start the built frontend
 CMD ["npm", "run", "start"]
