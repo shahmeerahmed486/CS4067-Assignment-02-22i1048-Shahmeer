@@ -25,13 +25,13 @@ spec:
             - containerPort: 3000
           env:
             - name: NEXT_PUBLIC_USER_SERVICE_URL
-              value: "http://user-service:8001"
+              value: "http://eventbooking.local:31508/api/user"
             - name: NEXT_PUBLIC_EVENT_SERVICE_URL
-              value: "http://event-service:8002"
+              value: "http://eventbooking.local:31508/api/event"
             - name: NEXT_PUBLIC_BOOKING_SERVICE_URL
-              value: "http://booking-service:8003"
+              value: "http://eventbooking.local:31508/api/booking"
             - name: NEXT_PUBLIC_NOTIFICATION_SERVICE_URL
-              value: "http://notification-service:8004"
+              value: "http://eventbooking.local:31508/api/notification"
           envFrom:
             - configMapRef:
                 name: event-booking-config
@@ -49,4 +49,4 @@ spec:
     - protocol: TCP
       port: 3000
       targetPort: 3000
-  type: NodePort
+  type: ClusterIP

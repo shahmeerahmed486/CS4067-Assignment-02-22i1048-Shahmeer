@@ -11,10 +11,10 @@ data:
   NOTIFICATION_SERVICE_URL: "http://notification-service:8004"
 
   # Frontend-specific environment variables
-  NEXT_PUBLIC_USER_SERVICE_URL: "http://user-service:8001"
-  NEXT_PUBLIC_EVENT_SERVICE_URL: "http://event-service:8002"
-  NEXT_PUBLIC_BOOKING_SERVICE_URL: "http://booking-service:8003"
-  NEXT_PUBLIC_NOTIFICATION_SERVICE_URL: "http://notification-service:8004"
+  NEXT_PUBLIC_USER_SERVICE_URL: "http://eventbooking.local:31508/api/user"
+  NEXT_PUBLIC_EVENT_SERVICE_URL: "http://eventbooking.local:31508/api/event"
+  NEXT_PUBLIC_BOOKING_SERVICE_URL: "http://eventbooking.local:31508/api/booking"
+  NEXT_PUBLIC_NOTIFICATION_SERVICE_URL: "http://eventbooking.local:31508/api/notification"
 
   # RabbitMQ Hostname
   RABBITMQ_HOST: "rabbitmq"
