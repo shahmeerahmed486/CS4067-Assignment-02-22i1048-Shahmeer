@@ -28,11 +28,11 @@ spec:
             memory: "100Mi"
         env:
           - name: ApiGatewayUrl
-            value: http://104.45.20.246
+            value: http://192.168.100.34
           - name: CatalogApiUrl
-            value: http://catalog-api-service
+            value: http://192.168.100.34/api/catalog
           - name: BasketApiUrl
-            value: http://basket-api-service
+            value: http://192.168.100.34/api/basket
 ---
 # Frontend MVC service
 kind: Service
@@ -500,6 +500,8 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
     kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
   rules:
   - http:
