@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'Dockerfile'
+      - '*.Dockerfile'
       - '**/*.cs'
       - '*.yaml'  # changed from k8s/*.yaml to *.yaml
 
@@ -27,7 +27,7 @@ jobs:
 
       - name: Build and push Docker images
         run: |
-          docker build -t houssemdocker/frontend-mvc:latest -f Frontend.Mvc/Dockerfile .
+          docker build -t houssemdocker/frontend-mvc:latest -f Frontend.Mvc/Dockerfile Frontend.Mvc/
           docker push houssemdocker/frontend-mvc:latest
 
           docker build -t houssemdocker/catalog-api:latest -f Catalog.Api.Dockerfile .
