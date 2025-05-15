@@ -28,11 +28,11 @@ spec:
             memory: "100Mi"
         env:
           - name: ApiGatewayUrl
-            value: http://192.168.100.34
+            value: http://104.45.20.246
           - name: CatalogApiUrl
-            value: http://192.168.100.34/api/catalog
+            value: http://catalog-api-service
           - name: BasketApiUrl
-            value: http://192.168.100.34/api/basket
+            value: http://basket-api-service
 ---
 # Frontend MVC service
 kind: Service
@@ -94,15 +94,16 @@ spec:
     targetPort: 80
   type: LoadBalancer
 ---
+# Catalog MSSQL database deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: catalog-mssql-deployment
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: catalog-mssql
-  replicas: 1
   template:
     metadata:
       labels:
@@ -112,14 +113,12 @@ spec:
       containers:
       - name: catalog-mssql
         image: mcr.microsoft.com/mssql/server:2022-latest
-        imagePullPolicy: Always
         resources:
           limits:
-            cpu: "0.5"
-            memory: "1Gi"
+            cpu: "2"
+            memory: "2Gi"
           requests:
-            cpu: "0.2"
-            memory: "512Mi"
+            cpu: "0.5"
         ports:
         - containerPort: 1433
         env:
@@ -127,9 +126,6 @@ spec:
           value: "Y"
         - name: SA_PASSWORD
           value: "@Aa123456"
-        - name: MSSQL_PID
-          value: "Express"
-
       #   volumeMounts:
       #   - name: mssql-persistent-storage
       #     mountPath: /var/opt/mssql
@@ -209,10 +205,10 @@ kind: Deployment
 metadata:
   name: basket-mssql-deployment
 spec:
+  replicas: 1
   selector:
     matchLabels:
       app: basket-mssql
-  replicas: 1
   template:
     metadata:
       labels:
@@ -224,11 +220,10 @@ spec:
         image: mcr.microsoft.com/mssql/server:2022-latest
         resources:
           limits:
-            cpu: "1"
-            memory: "1.5Gi"
+            cpu: "2"
+            memory: "2Gi"
           requests:
-            cpu: "0.3"
-            memory: "750Mi"
+            cpu: "0.5"
         ports:
           - containerPort: 1433
         env:
@@ -236,7 +231,13 @@ spec:
             value: "Y"
           - name: SA_PASSWORD
             value: "@Aa123456"
-
+      #   volumeMounts:
+      #   - name: mssql-persistent-storage
+      #     mountPath: /var/opt/mssql
+      # volumes:
+      # - name: mssql-persistent-storage
+      #   persistentVolumeClaim:
+      #     claimName: mssql-pv-claim
 ---
 # Basket MSSQL database service
 apiVersion: v1
@@ -252,7 +253,7 @@ spec:
       targetPort: 1433
       nodePort: 30300
   type: NodePort
-
+---
 # RabbitMQ deployment
 apiVersion: apps/v1
 kind: Deployment
@@ -274,7 +275,7 @@ spec:
         ports:
         - containerPort: 5672
 ---
-# RabbitMQ service
+# RabbitMQ sevice
 kind: Service
 apiVersion: v1
 metadata:
@@ -285,10 +286,11 @@ spec:
   ports:
   - protocol: TCP
     port: 5672
-    targetPort: 5672
+    #targetPort: 5672
+    #nodePort: 30672
   type: ClusterIP
 ---
-# RabbitMQ Management service
+# RabbitMQ Management sevice
 kind: Service
 apiVersion: v1
 metadata:
@@ -325,7 +327,7 @@ spec:
         - containerPort: 80
         env:
           - name: RabbitMqUri
-            value: amqp://guest:guest@rabbitmq-service.default.svc.cluster.local:5672
+            value: amqp://guest:guest@rabbitmq-service//
 ---
 # Orders WebJob service
 kind: Service
@@ -488,40 +490,25 @@ spec:
     port: 6379
     targetPort: 6379
   type: LoadBalancer
+
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: test-ingress
+  name: eventbooking-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
-  ingressClassName: nginx  # ✅ Use this instead of deprecated annotation
+  ingressClassName: nginx
   rules:
-  - http:
-      paths:
-      - path: /
-        pathType: Prefix
-        backend:
-          service:
-            name: frontend-mvc-service
-            port:
-              number: 80
-      - path: /api/catalog
-        pathType: Prefix
-        backend:
-          service:
-            name: catalog-api-service
-            port:
-              number: 80
-      - path: /api/basket
-        pathType: Prefix
-        backend:
-          service:
-            name: basket-api-service
-            port:
-              number: 80
-
-
+    - host: eventbooking.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-mvc-service
+                port:
+                  number: 80
