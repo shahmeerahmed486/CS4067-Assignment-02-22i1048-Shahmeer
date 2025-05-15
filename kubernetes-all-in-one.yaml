@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: frontend-mvc
-        image: houssemdocker/frontend-mvc:0.1
+        image: 22i1048/frontend-mvc:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -65,7 +65,7 @@ spec:
     spec:
       containers:
       - name: catalog-api
-        image: houssemdocker/catalog-api:0.1
+        image: 22i1048/catalog-api:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
@@ -166,7 +166,7 @@ spec:
     spec:
       containers:
       - name: basket-api
-        image: houssemdocker/basket-api:0.1
+        image: 22i1048/basket-api:latest
         imagePullPolicy: Always
         ports:
         - containerPort: 80
