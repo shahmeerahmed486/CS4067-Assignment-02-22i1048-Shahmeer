@@ -95,12 +95,15 @@ spec:
   type: LoadBalancer
 ---
 # Catalog MSSQL database deployment
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: catalog-mssql-deployment
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: catalog-mssql
   template:
     metadata:
       labels:
@@ -109,7 +112,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
       - name: catalog-mssql
-        image: microsoft/mssql-server-linux
+        image: mcr.microsoft.com/mssql/server:2022-latest
         resources:
           limits:
             cpu: "2"
@@ -197,12 +200,15 @@ spec:
   type: LoadBalancer
 ---
 # Basket MSSQL database deployment
-apiVersion: apps/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: basket-mssql-deployment
 spec:
   replicas: 1
+  selector:
+    matchLabels:
+      app: basket-mssql
   template:
     metadata:
       labels:
@@ -211,7 +217,7 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
       - name: basket-mssql
-        image: microsoft/mssql-server-linux
+        image: mcr.microsoft.com/mssql/server:2022-latest
         resources:
           limits:
             cpu: "2"
@@ -484,18 +490,25 @@ spec:
     port: 6379
     targetPort: 6379
   type: LoadBalancer
+
+
 ---
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: test-ingress
+  name: eventbooking-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
+  ingressClassName: nginx
   rules:
-  - http:
-      paths:
-      - path: /testpath
-        backend:
-          serviceName: frontend-mvc-service
-          servicePort: 80
+    - host: eventbooking.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend-mvc-service
+                port:
+                  number: 80
