@@ -111,14 +111,15 @@ spec:
       terminationGracePeriodSeconds: 10
       containers:
       - name: catalog-mssql
-        image: microsoft/mssql-server-linux:latest  # Updated to latest version
-        imagePullPolicy: Always  # Ensures the latest image is pulled each time
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        imagePullPolicy: Always
         resources:
           limits:
-            cpu: "2"
-            memory: "2Gi"
-          requests:
             cpu: "0.5"
+            memory: "1Gi"
+          requests:
+            cpu: "0.2"
+            memory: "512Mi"
         ports:
         - containerPort: 1433
         env:
@@ -126,6 +127,8 @@ spec:
           value: "Y"
         - name: SA_PASSWORD
           value: "@Aa123456"
+        - name: MSSQL_PID
+          value: "Express"
 
       #   volumeMounts:
       #   - name: mssql-persistent-storage
@@ -221,10 +224,11 @@ spec:
         image: mcr.microsoft.com/mssql/server:2022-latest
         resources:
           limits:
-            cpu: "2"
-            memory: "2Gi"
+            cpu: "1"
+            memory: "1.5Gi"
           requests:
-            cpu: "0.5"
+            cpu: "0.3"
+            memory: "750Mi"
         ports:
           - containerPort: 1433
         env:
@@ -233,13 +237,6 @@ spec:
           - name: SA_PASSWORD
             value: "@Aa123456"
 
-      #   volumeMounts:
-      #   - name: mssql-persistent-storage
-      #     mountPath: /var/opt/mssql
-      # volumes:
-      # - name: mssql-persistent-storage
-      #   persistentVolumeClaim:
-      #     claimName: mssql-pv-claim
 ---
 # Basket MSSQL database service
 apiVersion: v1
@@ -255,7 +252,7 @@ spec:
       targetPort: 1433
       nodePort: 30300
   type: NodePort
----
+
 # RabbitMQ deployment
 apiVersion: apps/v1
 kind: Deployment
@@ -277,7 +274,7 @@ spec:
         ports:
         - containerPort: 5672
 ---
-# RabbitMQ sevice
+# RabbitMQ service
 kind: Service
 apiVersion: v1
 metadata:
@@ -288,11 +285,10 @@ spec:
   ports:
   - protocol: TCP
     port: 5672
-    #targetPort: 5672
-    #nodePort: 30672
+    targetPort: 5672
   type: ClusterIP
 ---
-# RabbitMQ Management sevice
+# RabbitMQ Management service
 kind: Service
 apiVersion: v1
 metadata:
@@ -329,7 +325,7 @@ spec:
         - containerPort: 80
         env:
           - name: RabbitMqUri
-            value: amqp://guest:guest@rabbitmq-service//
+            value: amqp://guest:guest@rabbitmq-service.default.svc.cluster.local:5672
 ---
 # Orders WebJob service
 kind: Service
@@ -499,10 +495,10 @@ metadata:
   name: test-ingress
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
-    kubernetes.io/ingress.class: "nginx"
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/use-regex: "true"
 spec:
+  ingressClassName: nginx  # ✅ Use this instead of deprecated annotation
   rules:
   - http:
       paths:
@@ -527,4 +523,5 @@ spec:
             name: basket-api-service
             port:
               number: 80
+
 
