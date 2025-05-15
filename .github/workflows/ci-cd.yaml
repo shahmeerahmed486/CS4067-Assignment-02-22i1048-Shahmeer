@@ -27,20 +27,20 @@ jobs:
 
       - name: Build and push Docker images
         run: |
-          docker build -t houssemdocker/frontend-mvc:latest -f frontend-mvc/Dockerfile .
+          docker build -t houssemdocker/frontend-mvc:latest -f Frontend.Mvc/Dockerfile .
           docker push houssemdocker/frontend-mvc:latest
 
-          docker build -t houssemdocker/catalog-api:latest -f catalog-api/Dockerfile .
+          docker build -t houssemdocker/catalog-api:latest -f Catalog.Api.Dockerfile .
           docker push houssemdocker/catalog-api:latest
 
-          docker build -t houssemdocker/cart-api:latest -f cart-api/Dockerfile .
-          docker push houssemdocker/cart-api:latest
+          docker build -t houssemdocker/basket-api:latest -f Basket.Api.Dockerfile .
+          docker push houssemdocker/basket-api:latest
 
       - name: Update YAML manifests with latest image tags
         run: |
-          sed -i 's|image: .*/frontend-mvc:.*|image: houssemdocker/frontend-mvc:latest|' frontend-mvc-deployment.yaml
-          sed -i 's|image: .*/catalog-api:.*|image: houssemdocker/catalog-api:latest|' catalog-api-deployment.yaml
-          sed -i 's|image: .*/cart-api:.*|image: houssemdocker/cart-api:latest|' cart-api-deployment.yaml
+          sed -i 's|image: .*/frontend-mvc:.*|image: houssemdocker/frontend-mvc:latest|' kubernetes-all-in-one.yaml
+          sed -i 's|image: .*/catalog-api:.*|image: houssemdocker/catalog-api:latest|' kubernetes-all-in-one.yaml
+          sed -i 's|image: .*/basket-api:.*|image: houssemdocker/basket-api:latest|' kubernetes-all-in-one.yaml
 
       - name: Commit updated manifests
         run: |
