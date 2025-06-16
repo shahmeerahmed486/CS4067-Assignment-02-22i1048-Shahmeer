@@ -1,0 +1,54 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '*.Dockerfile'
+      - '**/*.cs'
+      - '*.yaml'  # changed from k8s/*.yaml to *.yaml
+
+jobs:
+  docker-build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+
+      - name: Build and push Docker images
+        run: |
+          docker build -t 22i1048/frontend-mvc:latest -f Frontend.Mvc/Dockerfile Frontend.Mvc/
+          docker push 22i1048/frontend-mvc:latest
+
+          docker build -t 22i1048/catalog-api:latest -f Catalog.Api.Dockerfile .
+          docker push 22i1048/catalog-api:latest
+
+          docker build -t 22i1048/basket-api:latest -f Basket.Api.Dockerfile .
+          docker push 22i1048/basket-api:latest
+
+      - name: Update YAML manifests with latest image tags
+        run: |
+          sed -i 's|image: .*/frontend-mvc:.*|image: 22i1048/frontend-mvc:latest|' kubernetes-all-in-one.yaml
+          sed -i 's|image: .*/catalog-api:.*|image: 22i1048/catalog-api:latest|' kubernetes-all-in-one.yaml
+          sed -i 's|image: .*/basket-api:.*|image: 22i1048/basket-api:latest|' kubernetes-all-in-one.yaml
+
+      - name: Commit updated manifests
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git add *.yaml
+          git commit -m "Update deployment manifests with latest image tags" || echo "No changes to commit"
+          git remote set-url origin https://${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}
+          git push

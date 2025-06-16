@@ -6,12 +6,12 @@ services:
       dockerfile: Dockerfile
     container_name: frontend.mvc
     image: houssemdocker/frontend-mvc:${TAG:-0.1}
-    ports: 
+    ports:
       - 6100:80
-    environment: 
+    environment:
       CatalogApiUrl: http://catalog.api
       BasketApiUrl: http://basket.api
-    depends_on: 
+    depends_on:
       - catalog.api
       - catalog.db
 
@@ -23,7 +23,7 @@ services:
     image: houssemdocker/catalog-api:${TAG:-0.1}
     ports:
       - 6200:80
-    environment: 
+    environment:
       ConnectionStrings__CatalogContext: Server=catalog.db;Database=CatalogContext;User Id=sa;Password=@Aa123456
     depends_on:
       - catalog.db
@@ -43,9 +43,9 @@ services:
     image: houssemdocker/basket-api:${TAG:-0.1}
     ports:
       - 6300:80
-    environment: 
+    environment:
       ConnectionStrings__BasketContext: Server=basket.db;Database=BasketContext;User Id=sa;Password=@Aa123456
-      RedisCacheConnection: "redis-cache"    
+      RedisCacheConnection: "redis-cache"
     depends_on:
       - basket.db
 
@@ -64,7 +64,7 @@ services:
     image: houssemdocker/orders-webjob:${TAG:-0.1}
     ports:
       - 6400:80
-    environment: 
+    environment:
       RabbitMqUri: "amqp://guest:guest@localhost:5672//" # "/" is the name of the virtual host in RabbitMQ
       ConnectionStrings__ServiceBusConnectionString: Endpoint=sb://microservicesoncontainers.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=pydtJlzPcGSoHLuO/YcUi6MDZ/liZRI7BTMiwP4glXA=
 
